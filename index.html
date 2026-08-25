@@ -4,33 +4,213 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>MINI STORE CHECKOUT SYSTEM</title>
+    <style>
+        :root {
+            --primary: #2563eb;
+            --primary-hover: #1d4ed8;
+            --bg: #f8fafc;
+            --card-bg: #ffffff;
+            --text: #0f172a;
+            --text-muted: #64748b;
+            --border: #e2e8f0;
+            --error-bg: #fef2f2;
+            --error-text: #dc2626;
+            --radius: 8px;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--bg);
+            color: var(--text);
+            margin: 0;
+            padding: 40px 20px;
+            display: flex;
+            justify-content: center;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 550px;
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -2px rgba(0, 0, 0, 0.05);
+            padding: 28px;
+        }
+
+        h1 {
+            font-size: 1.25rem;
+            font-weight: 700;
+            letter-spacing: 0.05em;
+            text-align: center;
+            margin-top: 0;
+            margin-bottom: 24px;
+            color: var(--text);
+            border-bottom: 2px solid var(--border);
+            padding-bottom: 12px;
+        }
+
+        #validationMessage {
+            background-color: var(--error-bg);
+            color: var(--error-text);
+            padding: 10px 14px;
+            border-radius: var(--radius);
+            font-size: 0.875rem;
+            margin-bottom: 16px;
+            display: none;
+            font-weight: 500;
+        }
+
+        #validationMessage:not(:empty) {
+            display: block;
+        }
+
+        .form-group {
+            margin-bottom: 16px;
+        }
+
+        label {
+            display: block;
+            font-size: 0.875rem;
+            font-weight: 600;
+            margin-bottom: 6px;
+            color: var(--text);
+        }
+
+        input[type="text"],
+        input[type="number"],
+        select {
+            width: 100%;
+            padding: 10px 12px;
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            font-size: 0.95rem;
+            box-sizing: border-box;
+            background-color: #fff;
+            transition: border-color 0.15s ease-in-out;
+        }
+
+        input[type="text"]:focus,
+        input[type="number"]:focus,
+        select:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+        }
+
+        .inline-group {
+            display: flex;
+            gap: 8px;
+        }
+
+        .inline-group input {
+            flex: 1;
+        }
+
+        button {
+            background-color: var(--primary);
+            color: white;
+            border: none;
+            padding: 10px 16px;
+            border-radius: var(--radius);
+            font-weight: 600;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: background-color 0.15s ease-in-out;
+        }
+
+        button:hover {
+            background-color: var(--primary-hover);
+        }
+
+        #calculateBtn {
+            width: 100%;
+            padding: 12px;
+            font-size: 1rem;
+            margin-top: 8px;
+        }
+
+        .product-card {
+            background: #f8fafc;
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 14px;
+            margin-bottom: 12px;
+        }
+
+        .product-card h4 {
+            margin: 0 0 10px 0;
+            font-size: 0.9rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.025em;
+        }
+
+        #orderSummary:not(:empty) {
+            margin-top: 24px;
+            padding-top: 20px;
+            border-top: 2px dashed var(--border);
+        }
+
+        #orderSummary h2 {
+            font-size: 1.1rem;
+            margin-top: 0;
+            margin-bottom: 16px;
+        }
+
+        .summary-item {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 8px;
+            font-size: 0.95rem;
+        }
+
+        .summary-total {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: var(--primary);
+            border-top: 1px solid var(--border);
+            padding-top: 10px;
+            margin-top: 10px;
+        }
+    </style>
 </head>
 <body>
-    <h1>MINI STORE CHECKOUT SYSTEM</h1>
+    <div class="container">
+        <h1>MINI STORE CHECKOUT SYSTEM</h1>
 
-    <div id="validationMessage" style="color: red;"></div>
+        <div id="validationMessage"></div>
 
-    <form id="checkoutForm" onsubmit="return false;">
-        <label for="customerName">Customer Name</label>
-        <input type="text" id="customerName" name="customerName"><br><br>
+        <form id="checkoutForm" onsubmit="return false;">
+            <div class="form-group">
+                <label for="customerName">Customer Name</label>
+                <input type="text" id="customerName" name="customerName">
+            </div>
 
-        <label for="productCount">Number of Products</label>
-        <input type="number" id="productCount" name="productCount" min="1">
-        <button type="button" id="generateProductsBtn">Set Products</button><br><br>
+            <div class="form-group">
+                <label for="productCount">Number of Products</label>
+                <div class="inline-group">
+                    <input type="number" id="productCount" name="productCount" min="1">
+                    <button type="button" id="generateProductsBtn">Set Products</button>
+                </div>
+            </div>
 
-        <div id="productsContainer"></div><br>
+            <div id="productsContainer"></div>
 
-        <label for="deliveryOption">Delivery Option</label>
-        <select id="deliveryOption" name="deliveryOption">
-            <option value="1">Store Pickup (₱0)</option>
-            <option value="2">Standard Delivery (₱80)</option>
-            <option value="3">Express Delivery (₱150)</option>
-        </select><br><br>
+            <div class="form-group">
+                <label for="deliveryOption">Delivery Option</label>
+                <select id="deliveryOption" name="deliveryOption">
+                    <option value="1">Store Pickup (₱0)</option>
+                    <option value="2">Standard Delivery (₱80)</option>
+                    <option value="3">Express Delivery (₱150)</option>
+                </select>
+            </div>
 
-        <button type="button" id="calculateBtn">Calculate Order</button>
-    </form>
+            <button type="button" id="calculateBtn">Calculate Order</button>
+        </form>
 
-    <div id="orderSummary"></div>
+        <div id="orderSummary"></div>
+    </div>
 
     <script src="script.js"></script>
 </body>
