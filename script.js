@@ -15,124 +15,119 @@ function calculateDiscount(subtotal) {
 }
 
 function getDeliveryFee(option) {
-    switch (parseInt(option)) {
-        case 1:
+    switch (option) {
+        case '1':
             return 0;
-        case 2:
+        case '2':
             return 80;
-        case 3:
+        case '3':
             return 150;
         default:
             return 0;
     }
 }
 
-function generateProductFields() {
-    const countInput = document.getElementById('productCount').value;
-    const count = parseInt(countInput);
+document.getElementById('productCount').addEventListener('input', function() {
+    const count = parseInt(this.value);
     const container = document.getElementById('productsContainer');
-
-    container.innerHTML = '';
-
-    if (isNaN(count) || count <= 0) {
-        return;
+    container.innerHTML = ''; 
+    
+    if (count > 0) {
+        for (let i = 0; i < count; i++) {
+            const productDiv = document.createElement('div');
+            productDiv.style.marginBottom = '10px';
+            productDiv.innerHTML = `
+                <h4>Product ${i + 1}</h4>
+                <label for="productName-${i}">Product Name</label>
+                <input type="text" id="productName-${i}">
+                
+                <label for="productPrice-${i}">Price</label>
+                <input type="number" id="productPrice-${i}" min="0" step="0.01">
+                
+                <label for="productQuantity-${i}">Quantity</label>
+                <input type="number" id="productQuantity-${i}" min="1">
+            `;
+            container.appendChild(productDiv);
+        }
     }
-
-    for (let i = 0; i < count; i++) {
-        const productDiv = document.createElement('div');
-        productDiv.innerHTML = `
-            <p>Product ${i + 1}</p>
-            <label for="productName-${i}">Product Name</label>
-            <input type="text" id="productName-${i}"><br>
-            <label for="productPrice-${i}">Price</label>
-            <input type="number" id="productPrice-${i}" step="0.01"><br>
-            <label for="productQuantity-${i}">Quantity</label>
-            <input type="number" id="productQuantity-${i}"><br><br>
-        `;
-        container.appendChild(productDiv);
-    }
-}
-
-document.getElementById('productCount').addEventListener('input', generateProductFields);
-document.getElementById('productCount').addEventListener('change', generateProductFields);
+});
 
 document.getElementById('calculateBtn').addEventListener('click', function() {
     const customerName = document.getElementById('customerName').value.trim();
-    const productCountInput = document.getElementById('productCount').value;
-    const productCount = parseInt(productCountInput);
-    const deliveryOption = document.getElementById('deliveryOption').value;
+    const productCount = parseInt(document.getElementById('productCount').value);
     const validationMessage = document.getElementById('validationMessage');
     const orderSummary = document.getElementById('orderSummary');
-
-    validationMessage.innerText = '';
-    orderSummary.innerText = '';
-
+    
+    validationMessage.innerHTML = '';
+    orderSummary.innerHTML = '';
+    
     if (!customerName) {
-        validationMessage.innerText = 'Customer Name is required.';
+        validationMessage.innerText = 'Customer name cannot be empty.';
         return;
     }
-
+    
     if (isNaN(productCount) || productCount <= 0) {
-        validationMessage.innerText = 'Number of Products must be a valid positive number.';
+        validationMessage.innerText = 'Please enter a valid positive number for Number of Products.';
         return;
     }
 
     let subtotal = 0;
-    let productsText = '';
-
+    let summaryHTML = `<h3>MINI STORE CHECKOUT SYSTEM</h3><p>Customer: ${customerName}</p>`;
+    
     for (let i = 0; i < productCount; i++) {
-        const nameEl = document.getElementById(`productName-${i}`);
-        const priceEl = document.getElementById(`productPrice-${i}`);
-        const qtyEl = document.getElementById(`productQuantity-${i}`);
-
-        if (!nameEl || !priceEl || !qtyEl) {
-            validationMessage.innerText = 'Product input fields missing.';
+        const nameInput = document.getElementById(`productName-${i}`);
+        const priceInput = document.getElementById(`productPrice-${i}`);
+        const qtyInput = document.getElementById(`productQuantity-${i}`);
+        
+        if (!nameInput || !priceInput || !qtyInput) {
+            validationMessage.innerText = 'Product fields are missing. Please re-enter the number of products.';
             return;
         }
-
-        const name = nameEl.value.trim();
-        const price = parseFloat(priceEl.value);
-        const qty = parseInt(qtyEl.value);
-
-        if (!name) {
-            validationMessage.innerText = 'Product Name is required.';
+        
+        const name = nameInput.value.trim();
+        const price = parseFloat(priceInput.value);
+        const quantity = parseInt(qtyInput.value);
+        
+        if (!name || isNaN(price) || price < 0 || isNaN(quantity) || quantity <= 0) {
+            validationMessage.innerText = `Please ensure product ${i + 1} has a valid name, and positive numbers for price and quantity.`;
             return;
         }
-        if (isNaN(price) || price <= 0) {
-            validationMessage.innerText = 'Price must be a valid positive number.';
-            return;
-        }
-        if (isNaN(qty) || qty <= 0) {
-            validationMessage.innerText = 'Quantity must be a valid positive number.';
-            return;
-        }
-
-        const itemAmount = calculateItemAmount(price, qty);
-        subtotal += itemAmount;
-
-        productsText += `${i + 1}. ${name}\n   Price: ₱${price.toFixed(2)}\n   Quantity: ${qty}\n   Amount: ₱${itemAmount.toFixed(2)}\n`;
+        
+        const amount = calculateItemAmount(price, quantity);
+        subtotal += amount;
+        
+        summaryHTML += `
+            <p>
+                ${i + 1}. ${name}<br>
+                Price: ₱${price.toFixed(2)}<br>
+                Quantity: ${quantity}<br>
+                Amount: ₱${amount.toFixed(2)}
+            </p>
+        `;
     }
+    
+    const discount = calculateDiscount(subtotal);
+    const deliveryOptionSelect = document.getElementById('deliveryOption');
+    const deliveryOptionValue = deliveryOptionSelect.value;
+    const deliveryFee = getDeliveryFee(deliveryOptionValue);
+    const deliveryTypeText = deliveryOptionSelect.options[deliveryOptionSelect.selectedIndex].text;
+    
+    let discountRateStr = "0%";
+    if (subtotal >= 5000) discountRateStr = "10%";
+    else if (subtotal >= 3000) discountRateStr = "7%";
+    else if (subtotal >= 1000) discountRateStr = "5%";
 
-    const discountAmount = calculateDiscount(subtotal);
-    const discountRatePercent = subtotal > 0 ? Math.round((discountAmount / subtotal) * 100) : 0;
-    const deliveryFee = getDeliveryFee(deliveryOption);
-    const finalAmount = subtotal - discountAmount + deliveryFee;
-
-    let deliveryTypeName = '';
-    switch (parseInt(deliveryOption)) {
-        case 1: deliveryTypeName = 'Store Pickup'; break;
-        case 2: deliveryTypeName = 'Standard Delivery'; break;
-        case 3: deliveryTypeName = 'Express Delivery'; break;
-    }
-
-    orderSummary.innerText = 
-`MINI STORE CHECKOUT SYSTEM
-Customer: ${customerName}
-${productsText}ORDER SUMMARY
-Subtotal: ₱${subtotal.toFixed(2)}
-Discount Rate: ${discountRatePercent}%
-Discount Amount: ₱${discountAmount.toFixed(2)}
-Delivery Type: ${deliveryTypeName}
-Delivery Fee: ₱${deliveryFee.toFixed(2)}
-Final Amount: ₱${finalAmount.toFixed(2)}`;
+    const finalAmount = subtotal - discount + deliveryFee;
+    
+    summaryHTML += `
+        <h4>ORDER SUMMARY</h4>
+        <p>Subtotal: ₱${subtotal.toFixed(2)}</p>
+        <p>Discount Rate: ${discountRateStr}</p>
+        <p>Discount Amount: ₱${discount.toFixed(2)}</p>
+        <p>Delivery Type: ${deliveryTypeText}</p>
+        <p>Delivery Fee: ₱${deliveryFee.toFixed(2)}</p>
+        <p><strong>Final Amount: ₱${finalAmount.toFixed(2)}</strong></p>
+    `;
+    
+    orderSummary.innerHTML = summaryHTML;
 });
