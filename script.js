@@ -26,3 +26,35 @@ function getDeliveryFee(option) {
             return 0;
     }
 }
+
+document.getElementById('generateProductsBtn').addEventListener('click', function() {
+    const countInput = document.getElementById('productCount').value;
+    const count = parseInt(countInput);
+    const container = document.getElementById('productsContainer');
+    const validationMessage = document.getElementById('validationMessage');
+
+    container.innerHTML = '';
+    validationMessage.innerText = '';
+
+    if (isNaN(count) || count <= 0) {
+        validationMessage.innerText = 'Please enter a valid positive number for products.';
+        return;
+    }
+
+    for (let i = 0; i < count; i++) {
+        const productDiv = document.createElement('div');
+        productDiv.style.marginBottom = '10px';
+        productDiv.innerHTML = `
+            <h4>Product ${i + 1}</h4>
+            <label for="productName-${i}">Product Name</label>
+            <input type="text" id="productName-${i}" name="productName-${i}"><br>
+
+            <label for="productPrice-${i}">Price</label>
+            <input type="number" id="productPrice-${i}" name="productPrice-${i}" step="0.01"><br>
+
+            <label for="productQuantity-${i}">Quantity</label>
+            <input type="number" id="productQuantity-${i}" name="productQuantity-${i}"><br>
+        `;
+        container.appendChild(productDiv);
+    }
+});
