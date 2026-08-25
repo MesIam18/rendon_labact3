@@ -58,3 +58,93 @@ document.getElementById('generateProductsBtn').addEventListener('click', functio
         container.appendChild(productDiv);
     }
 });
+
+document.getElementById('calculateBtn').addEventListener('click', function() {
+    const customerName = document.getElementById('customerName').value.trim();
+    const productCountInput = document.getElementById('productCount').value;
+    const productCount = parseInt(productCountInput);
+    const deliveryOption = document.getElementById('deliveryOption').value;
+    const validationMessage = document.getElementById('validationMessage');
+    const orderSummary = document.getElementById('orderSummary');
+
+    validationMessage.innerText = '';
+    orderSummary.innerHTML = '';
+
+    if (!customerName) {
+        validationMessage.innerText = 'Customer Name is required.';
+        return;
+    }
+
+    if (isNaN(productCount) || productCount <= 0) {
+        validationMessage.innerText = 'Number of Products must be a valid positive number.';
+        return;
+    }
+
+    let subtotal = 0;
+    let productsListHTML = '';
+
+    for (let i = 0; i < productCount; i++) {
+        const nameEl = document.getElementById(`productName-${i}`);
+        const priceEl = document.getElementById(`productPrice-${i}`);
+        const qtyEl = document.getElementById(`productQuantity-${i}`);
+
+        if (!nameEl || !priceEl || !qtyEl) {
+            validationMessage.innerText = 'Please click "Set Products" to generate product fields first.';
+            return;
+        }
+
+        const name = nameEl.value.trim();
+        const price = parseFloat(priceEl.value);
+        const qty = parseInt(qtyEl.value);
+
+        if (!name) {
+            validationMessage.innerText = `Product Name for item ${i + 1} is required.`;
+            return;
+        }
+        if (isNaN(price) || price <= 0) {
+            validationMessage.innerText = `Price for item ${i + 1} must be a valid positive number.`;
+            return;
+        }
+        if (isNaN(qty) || qty <= 0) {
+            validationMessage.innerText = `Quantity for item ${i + 1} must be a valid positive number.`;
+            return;
+        }
+
+        const itemAmount = calculateItemAmount(price, qty);
+        subtotal += itemAmount;
+
+        productsListHTML += `
+            <p>
+                ${i + 1}. ${name}<br>
+                &nbsp;&nbsp;&nbsp;Price: ₱${price.toFixed(2)}<br>
+                &nbsp;&nbsp;&nbsp;Quantity: ${qty}<br>
+                &nbsp;&nbsp;&nbsp;Amount: ₱${itemAmount.toFixed(2)}
+            </p>
+        `;
+    }
+
+    const discountAmount = calculateDiscount(subtotal);
+    const discountRatePercent = subtotal > 0 ? ((discountAmount / subtotal) * 100).toFixed(0) : 0;
+    const deliveryFee = getDeliveryFee(deliveryOption);
+    const finalAmount = subtotal - discountAmount + deliveryFee;
+
+    let deliveryTypeName = '';
+    switch (parseInt(deliveryOption)) {
+        case 1: deliveryTypeName = 'Store Pickup'; break;
+        case 2: deliveryTypeName = 'Standard Delivery'; break;
+        case 3: deliveryTypeName = 'Express Delivery'; break;
+    }
+
+    orderSummary.innerHTML = `
+        <h2>ORDER SUMMARY</h2>
+        <p><strong>Customer:</strong> ${customerName}</p>
+        ${productsListHTML}
+        <hr>
+        <p><strong>Subtotal:</strong> ₱${subtotal.toFixed(2)}</p>
+        <p><strong>Discount Rate:</strong> ${discountRatePercent}%</p>
+        <p><strong>Discount Amount:</strong> ₱${discountAmount.toFixed(2)}</p>
+        <p><strong>Delivery Type:</strong> ${deliveryTypeName}</p>
+        <p><strong>Delivery Fee:</strong> ₱${deliveryFee.toFixed(2)}</p>
+        <p><strong>Final Amount:</strong> ₱${finalAmount.toFixed(2)}</p>
+    `;
+});
